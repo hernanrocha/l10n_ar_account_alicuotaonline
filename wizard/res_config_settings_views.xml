@@ -17,12 +17,8 @@
                         </div> -->
                         <div class="content-group">
                             <div class="row">
-                                <label for="alicuotaonline_api_key" class="col-md-6 o_light_label" string="Alícuota retención no inscripto"/>
+                                <label for="alicuotaonline_api_key" class="col-md-6 o_light_label" string="API Key"/>
                                 <field name="alicuotaonline_api_key" class="oe_inline"/>
-                            </div>
-                            <div class="row">
-                                <label for="cdba_alicuota_no_sincripto_percepcion" class="col-md-6 o_light_label" string="Alícuota percepción no inscripto"/>
-                                <field name="cdba_alicuota_no_sincripto_percepcion" class="oe_inline"/>
                             </div>
                         </div>
                     </div>
