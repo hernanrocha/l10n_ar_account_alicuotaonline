@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="res_config_settings_view_form">
+        <field name="name">res.config.settings.view.form.alicuotaonline</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <div name="argentina_localization" position="inside">
+                <div class="col-xs-12 col-md-6 o_setting_box">
+                    <div class="o_setting_left_pane"/>
+                    <div class="o_setting_right_pane">
+                        <label for="agip_padron_type" string="AlicuotaOnline.com"/>
+                        <span class="fa fa-lg fa-building-o" title="Valores específicos de la compañía" groups="base.group_multi_company"/>
+                        <div class="text-muted">
+                            API Key
+                        </div>
+                        <div class="content-group">
+                            <div class="row">
+                                <label for="cdba_alicuota_no_sincripto_retencion" class="col-md-6 o_light_label" string="Alícuota retención no inscripto"/>
+                                <field name="cdba_alicuota_no_sincripto_retencion" class="oe_inline"/>
+                            </div>
+                            <div class="row">
+                                <label for="cdba_alicuota_no_sincripto_percepcion" class="col-md-6 o_light_label" string="Alícuota percepción no inscripto"/>
+                                <field name="cdba_alicuota_no_sincripto_percepcion" class="oe_inline"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </field>
+    </record>
+
+</odoo>
