@@ -10,15 +10,15 @@
                 <div class="col-xs-12 col-md-6 o_setting_box">
                     <div class="o_setting_left_pane"/>
                     <div class="o_setting_right_pane">
-                        <label for="agip_padron_type" string="AlicuotaOnline.com"/>
+                        <label for="alicuotaonline_label" string="AlicuotaOnline"/>
                         <span class="fa fa-lg fa-building-o" title="Valores específicos de la compañía" groups="base.group_multi_company"/>
-                        <div class="text-muted">
-                            API Key
-                        </div>
+                        <!-- <div class="text-muted">
+                            Indique a continuación la configuración de AlicuotaOnline
+                        </div> -->
                         <div class="content-group">
                             <div class="row">
-                                <label for="cdba_alicuota_no_sincripto_retencion" class="col-md-6 o_light_label" string="Alícuota retención no inscripto"/>
-                                <field name="cdba_alicuota_no_sincripto_retencion" class="oe_inline"/>
+                                <label for="alicuotaonline_api_key" class="col-md-6 o_light_label" string="Alícuota retención no inscripto"/>
+                                <field name="alicuotaonline_api_key" class="oe_inline"/>
                             </div>
                             <div class="row">
                                 <label for="cdba_alicuota_no_sincripto_percepcion" class="col-md-6 o_light_label" string="Alícuota percepción no inscripto"/>
