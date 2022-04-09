@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- groups="account.group_account_readonly,account.group_account_invoice" -->
+    <menuitem name="Nanosoftware"
+        id="menu_nano"
+        web_icon="account,static/description/icon.png"
+        sequence="45">
+    </menuitem>
+
+    <!-- Menu Agentes -->
+    <menuitem name="Agentes" sequence="1" parent="menu_nano" id="menu_nano_iibb" />
+
+    <record id="action_nano_iibb_agip" model="ir.actions.act_window">
+        <field name="name">AGIP</field>
+        <field name="res_model">l10n_ar.agente.agip.wizard</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="AGIP" sequence="1" parent="menu_nano_iibb"
+        id="menu_nano_iibb_agip" action="action_nano_iibb_agip" />
+
+    <record id="action_nano_iibb_arba" model="ir.actions.act_window">
+        <field name="name">ARBA</field>
+        <field name="res_model">l10n_ar.agente.arba.wizard</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="ARBA" sequence="2" parent="menu_nano_iibb"
+        id="menu_nano_iibb_arba" action="action_nano_iibb_arba" />
+
+    <!-- Menu Tablas -->
+    <menuitem name="Tablas" sequence="100" parent="menu_nano" id="menu_nano_tables" />
+
+    <record id="action_nano_tables_account_tags" model="ir.actions.act_window">
+        <field name="name">Cuentas Analíticas</field>
+        <field name="res_model">account.account.tag</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="account_tag_tree" />
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="Cuentas Analíticas" sequence="1" parent="menu_nano_tables"
+        id="menu_nano_tables_account_tags" action="action_nano_tables_account_tags" />
+
+    <record id="action_nano_tables_document_type" model="ir.actions.act_window">
+        <field name="name">Tipos de Comprobante</field>
+        <field name="res_model">account.document.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="account_document_type_tree" />
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="Tipos de Comprobante" sequence="2" parent="menu_nano_tables"
+        id="menu_nano_tables_document_type" action="action_nano_tables_document_type" />
+
+    <record id="action_nano_tables_afip_responsability_type" model="ir.actions.act_window">
+        <field name="name">Tipos de Resp. AFIP</field>
+        <field name="res_model">afip.responsability.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="afip_responsability_type_tree" />
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="Tipos de Resp. AFIP" sequence="3" parent="menu_nano_tables"
+        id="menu_nano_tables_afip_responsability_type" action="action_nano_tables_afip_responsability_type" />
+
+    <record id="action_nano_tables_partner_id_category" model="ir.actions.act_window">
+        <field name="name">Tipos de Documento</field>
+        <field name="res_model">res.partner.id_category</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="partner_id_category_tree" />
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="Tipos de Documento" sequence="4" parent="menu_nano_tables"
+        id="menu_nano_tables_partner_id_category" action="action_nano_tables_partner_id_category" />
+
+    <record id="action_nano_tables_account_account" model="ir.actions.act_window">
+        <field name="name">Plan de Cuentas</field>
+        <field name="res_model">account.account</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="account_account_tree" />
+        <field name="target">main</field>
+    </record>
+
+    <menuitem name="Plan de Cuentas" sequence="5" parent="menu_nano_tables"
+        id="menu_nano_tables_account_account" action="action_nano_tables_account_account" />
+
+</odoo>

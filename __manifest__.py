@@ -11,7 +11,13 @@
     'version': '11.0.0.1',
     'depends': ['l10n_ar_account_withholding'],
     'data': [
-        'wizard/res_config_settings_views.xml'
+        'security/ir.model.access.csv',
+
+        'views/iibb_views.xml',
+        'views/table_views.xml',
+        'views/account_menuitem.xml',
+
+        'wizard/res_config_settings_views.xml',
     ],
     'demo': [],
 }
