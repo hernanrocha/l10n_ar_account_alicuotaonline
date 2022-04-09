@@ -152,8 +152,11 @@
                                 <tree default_order="fecha">
                                     <field name="cuit"/>
                                     <field name="fecha"/>
-                                    <field name="numero_sucursal"/>
-                                    <field name="numero_emision" />
+                                    <field name="tipo_cbte" />
+                                    <field name="letra_cbte" />
+                                    <field name="pto_venta" />
+                                    <field name="numero_cbte" />
+                                    <field name="monto_imponible" />
                                     <field name="monto_percepcion" />
                                     <field name="tipo_operacion" />
                                 </tree>
@@ -165,11 +168,8 @@
                                 <tree default_order="fecha">
                                     <field name="cuit"/>
                                     <field name="fecha"/>
-                                    <field name="tipo_cbte" />
-                                    <field name="letra_cbte" />
-                                    <field name="pto_venta" />
-                                    <field name="numero_cbte" />
-                                    <field name="monto_imponible" />
+                                    <field name="numero_sucursal"/>
+                                    <field name="numero_emision" />
                                     <field name="monto_percepcion" />
                                     <field name="tipo_operacion" />
                                 </tree>
