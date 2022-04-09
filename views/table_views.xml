@@ -70,7 +70,6 @@
                 <field name="tax_ids" />
                 <field name="tag_ids" />
                 <field name="reconcile" />
-                <field name="partida_monetaria" widget="boolean_switch" />
             </tree>
         </field>
     </record>
