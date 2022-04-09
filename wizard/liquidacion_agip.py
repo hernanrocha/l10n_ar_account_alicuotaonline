@@ -23,19 +23,6 @@ class IngresosBrutosAgipComprobante(models.Model):
     _name = "l10n_ar.agente.agip.comprobante"
     _description = "Linea de Comprobante AGIP"
 
-    company_id = fields.Many2one(comodel_name='res.company', 
-        string='Empresa',
-        store=True, 
-        readonly=True,
-        compute='_compute_company_id')
-    currency_id = fields.Many2one(
-        'res.currency', string='Moneda',
-        related='company_id.currency_id', readonly=True)
-
-    def _compute_company_id(self):
-        for line in self:
-            line.company_id = self.env.company
-    
     # Campo 1 - Percepcion/Retencion
     tipo_operacion = fields.Selection(selection=[
         ('1','Retención'), ('2','Percepción')
@@ -59,7 +46,7 @@ class IngresosBrutosAgipComprobante(models.Model):
     # Campo 7 - Fecha Comprobante
     fecha_cbte = fields.Date(string="Fecha Cbte")
     # Campo 8 - Monto Total
-    monto_total = fields.Monetary(string="Monto Total")
+    monto_total = fields.Float(string="Monto Total")
     # Campo 9 - Numero de Certificado
     numero_certificado = fields.Char(string="Numero Certificado")
     # Campo 10 - Tipo de Documento Cliente
@@ -84,40 +71,27 @@ class IngresosBrutosAgipComprobante(models.Model):
         ('1', 'Resp. Inscripto'),
         ('3', 'Exento'),
         ('4', 'Monotributo'),
-    ], string="Situacion IIBB")
+    ], string="Situacion IVA")
     # Campo 15 - Razon Social
     razon_social = fields.Char(string="Razon Social")
     # Campo 16 - Importe Otros Conceptos
-    monto_otros = fields.Monetary(string="Otros Conceptos")
+    monto_otros = fields.Float(string="Otros Conceptos")
     # Campo 17 - Importe IVA
-    monto_iva = fields.Monetary(string="Importe IVA")
+    monto_iva = fields.Float(string="Importe IVA")
     # Campo 18 - Base Imponible (Total - IVA - Otros)  
-    monto_base = fields.Monetary(string="Base Imponible")
+    monto_base = fields.Float(string="Base Imponible")
     # Campo 19 - Alicuota (sacado de padron AGIP, por CUIT+fecha)
-    monto_alicuota = fields.Monetary(string="Alicuota")
+    monto_alicuota = fields.Float(string="Alicuota")
     # Campo 20 - Impuesto aplicado (Base * Alicuota / 100)  
-    monto_impuesto_1 = fields.Monetary(string="Impuesto Aplicado")
+    monto_impuesto_1 = fields.Float(string="Impuesto Aplicado")
     # Campo 21 - Impuesto aplicado
-    monto_impuesto_2 = fields.Monetary(string="Impuesto Aplicado")
+    monto_impuesto_2 = fields.Float(string="Impuesto Aplicado")
 
     report_id = fields.Many2one(comodel_name="l10n_ar.agente.agip.wizard", ondelete="cascade", readonly=True, invisible=True)
 
 class IngresosBrutosAgipNotaCredito(models.Model):
     _name = "l10n_ar.agente.agip.nota_credito"
     _description = "Linea de Nota de Credito AGIP"
-
-    company_id = fields.Many2one(comodel_name='res.company', 
-        string='Empresa',
-        store=True, 
-        readonly=True,
-        compute='_compute_company_id')
-    currency_id = fields.Many2one(
-        'res.currency', string='Moneda',
-        related='company_id.currency_id', readonly=True)
-
-    def _compute_company_id(self):
-        for line in self:
-            line.company_id = self.env.company
 
     # Campo 1 - Tipo de Operacion
     tipo_operacion = fields.Selection(selection=[
@@ -128,7 +102,7 @@ class IngresosBrutosAgipNotaCredito(models.Model):
     # Campo 3 - Fecha de Nota de Credito
     fecha = fields.Date(string="Fecha")
     # Campo 4 - Monto Base de Nota de Credito
-    monto_base_nc = fields.Monetary(string="Monto Base")
+    monto_base_nc = fields.Float(string="Monto Base")
     # Campo 5 - Numero de certificado
     certificado = fields.Char(string="")
     # Campo 6 - Tipo de Comprobante Origen
@@ -148,9 +122,9 @@ class IngresosBrutosAgipNotaCredito(models.Model):
     # Campo 11 - Fecha de Retencion/Percepcion original
     fecha_cbte = fields.Date(string="Fecha Ret/Perc")
     # Campo 12 - Monto a deducir
-    monto_perc = fields.Monetary(string="Monto a Deducir")
+    monto_perc = fields.Float(string="Monto a Deducir")
     # Campo 13 - Alicuota
-    monto_alicuota = fields.Monetary(string="Alicuota")
+    monto_alicuota = fields.Float(string="Alicuota")
 
     report_id = fields.Many2one(comodel_name="l10n_ar.agente.agip.wizard", ondelete="cascade", readonly=True, invisible=True)
 
@@ -275,6 +249,11 @@ class IngresosBrutosAgipWizard(models.Model):
     def generate(self):
         if not self.date_from or not self.date_to:
             return
+
+        self.write({ 
+            'comprobante_file_line_ids': [(5, 0, 0)],
+            'nota_credito_file_line_ids': [(5, 0, 0)]
+        })
 
         records = []
         records_nc = []
@@ -433,6 +412,23 @@ class IngresosBrutosAgipWizard(models.Model):
                         # Campo 13 - Alicuota [5]
                         format_amount(monto_alicuota, 5, 2, ","),
                     ]
+
+                    self.nota_credito_file_line_ids.create({
+                        'tipo_operacion': '2',
+                        'numero_nc': self._format_nc_numero_cbte(move),
+                        'fecha': fields.Date.from_string(move.date),
+                        'monto_base_nc': monto_base,
+                        'certificado': ''.rjust(16, ' '),
+                        'tipo_cbte': self._format_tipo_cbte(origin_move.document_type_id.internal_type),
+                        'letra_cbte': self._format_letra_cbte(origin_move),
+                        'numero_cbte': self._format_numero_cbte(origin_move),
+                        'numero_doc': partner_id.main_id_number,
+                        'codigo_norma': '029',
+                        'fecha_cbte': fields.Date.from_string(origin_move.date),
+                        'monto_perc': monto_perc,
+                        'monto_alicuota': monto_alicuota,
+                        'report_id': self.id
+                    })
 
                     records_nc.append(''.join(record))
                     records_nc_csv.append(','.join(map(lambda r: '"{}"'.format(r), record)))

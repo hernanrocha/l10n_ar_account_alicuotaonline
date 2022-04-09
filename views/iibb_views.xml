@@ -44,26 +44,45 @@
                             <field name="comprobante_file_line_ids">
                                 <tree default_order="fecha">
                                     <field name="tipo_operacion"/>
-                                    <field name="codigo_norma"/>
+                                    <field name="codigo_norma" optional="hide" />
                                     <field name="fecha"/>
                                     <field name="tipo_cbte"/>
                                     <field name="letra_cbte"/>
                                     <field name="numero_cbte"/>
-                                    <field name="fecha_cbte"/>
+                                    <field name="fecha_cbte" optional="hide" />
                                     <field name="monto_total"/>
                                     <field name="numero_certificado"/>
-                                    <field name="tipo_doc"/>
+                                    <field name="tipo_doc" optional="hide" />
                                     <field name="numero_doc"/>
-                                    <field name="situacion_iibb"/>
-                                    <field name="numero_iibb"/>
-                                    <field name="situacion_iva"/>
+                                    <field name="situacion_iibb" optional="hide" />
+                                    <field name="numero_iibb" optional="hide" />
+                                    <field name="situacion_iva" optional="hide" />
                                     <field name="razon_social"/>
                                     <field name="monto_otros"/>
                                     <field name="monto_iva"/>
                                     <field name="monto_base" />
                                     <field name="monto_alicuota" />
                                     <field name="monto_impuesto_1" />
-                                    <field name="monto_impuesto_2" />
+                                    <field name="monto_impuesto_2" optional="hide" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notas de Credito TXT" name="credit_notes_txt">
+                            <field name="nota_credito_file_line_ids">
+                                <tree default_order="fecha">
+                                    <field name="tipo_operacion" />
+                                    <field name="numero_nc" />
+                                    <field name="fecha" />
+                                    <field name="monto_base_nc" />
+                                    <field name="certificado" />
+                                    <field name="tipo_cbte" />
+                                    <field name="letra_cbte" />
+                                    <field name="numero_cbte" />
+                                    <field name="numero_doc" />
+                                    <field name="codigo_norma" />
+                                    <field name="fecha_cbte" />
+                                    <field name="monto_perc" />
+                                    <field name="monto_alicuota" />
                                 </tree>
                             </field>
                         </page>
