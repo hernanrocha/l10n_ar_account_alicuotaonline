@@ -416,7 +416,7 @@ class IngresosBrutosAgipWizard(models.Model):
                     self.nota_credito_file_line_ids.create({
                         'tipo_operacion': '2',
                         'numero_nc': self._format_nc_numero_cbte(move),
-                        'fecha': fields.Date.from_string(move.date),
+                        'fecha': move.date,
                         'monto_base_nc': monto_base,
                         'certificado': ''.rjust(16, ' '),
                         'tipo_cbte': self._format_tipo_cbte(origin_move.document_type_id.internal_type),
@@ -424,7 +424,7 @@ class IngresosBrutosAgipWizard(models.Model):
                         'numero_cbte': self._format_numero_cbte(origin_move),
                         'numero_doc': partner_id.main_id_number,
                         'codigo_norma': '029',
-                        'fecha_cbte': fields.Date.from_string(origin_move.date),
+                        'fecha_cbte': origin_move.date,
                         'monto_perc': monto_perc,
                         'monto_alicuota': monto_alicuota,
                         'report_id': self.id
