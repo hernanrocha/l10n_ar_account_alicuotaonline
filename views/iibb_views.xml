@@ -147,7 +147,7 @@
                             </group>
                         </page>
                         <page string="Percepciones TXT" name="percepciones_txt" 
-                            attrs="{'invisible': [('tipo', '=', 'percepciones')]}">
+                            attrs="{'invisible': [('tipo', '=', 'retenciones')]}">
                             <field name="percepciones_file_line_ids">
                                 <tree default_order="fecha">
                                     <field name="cuit"/>
@@ -163,7 +163,7 @@
                             </field>
                         </page>
                         <page string="Retenciones TXT" name="retenciones_txt" 
-                            attrs="{'invisible': [('tipo', '=', 'retenciones')]}">
+                            attrs="{'invisible': [('tipo', '=', 'percepciones')]}">
                             <field name="retenciones_file_line_ids">
                                 <tree default_order="fecha">
                                     <field name="cuit"/>
