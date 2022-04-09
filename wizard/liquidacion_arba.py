@@ -349,7 +349,7 @@ class IngresosBrutosArbaWizard(models.Model):
                 records_ret_csv.append(','.join(map(lambda r: '"{}"'.format(r), record)))
 
                 # TODO: Mostrar cantidades y totales
-                self.percepciones_file_line_ids.create({
+                self.retenciones_file_line_ids.create({
                     'cuit': self._format_cuit(partner_id),
                     'fecha': fields.Date.from_string(line.date),
                     'numero_sucursal': self._format_pto_venta(move),
