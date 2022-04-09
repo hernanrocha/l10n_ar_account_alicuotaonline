@@ -40,7 +40,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Comprobantes TXT" name="invoices">
+                        <page string="Comprobantes TXT" name="invoices_txt">
                             <field name="comprobante_file_line_ids">
                                 <tree default_order="fecha">
                                     <field name="tipo_operacion"/>
