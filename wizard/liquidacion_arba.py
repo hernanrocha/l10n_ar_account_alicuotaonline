@@ -51,7 +51,7 @@ class IngresosBrutosArbaRetencion(models.Model):
         ('M', 'Modificacion')
     ], string="Tipo Operacion")
 
-    import_id = fields.Many2one(comodel_name="l10n_ar.agente.arba.wizard", ondelete="cascade", readonly=True, invisible=True)
+    report_id = fields.Many2one(comodel_name="l10n_ar.agente.arba.wizard", ondelete="cascade", readonly=True, invisible=True)
 
 class IngresosBrutosArbaPercepcion(models.Model):
     _name = "l10n_ar.agente.arba.percepcion"
@@ -107,7 +107,7 @@ class IngresosBrutosArbaPercepcion(models.Model):
         ('M', 'Modificacion')
     ], string="Tipo Operacion")
 
-    import_id = fields.Many2one(comodel_name="l10n_ar.agente.arba.wizard", ondelete="cascade", readonly=True, invisible=True)
+    report_id = fields.Many2one(comodel_name="l10n_ar.agente.arba.wizard", ondelete="cascade", readonly=True, invisible=True)
 
 class IngresosBrutosArbaWizard(models.Model):
     _name = "l10n_ar.agente.arba.wizard"
@@ -137,8 +137,8 @@ class IngresosBrutosArbaWizard(models.Model):
     perc_line_ids = fields.Many2many('account.move.line', string="Percepciones", compute="generate")
     ret_line_ids = fields.Many2many('account.move.line', string="Retenciones", compute="generate")
 
-    retenciones_file_line_ids = fields.One2many(string="Lineas de Retencion", comodel_name="l10n_ar.agente.arba.retencion", inverse_name="import_id")
-    percepciones_file_line_ids = fields.One2many(string="Lineas de Percepcion", comodel_name="l10n_ar.agente.arba.percepcion", inverse_name="import_id")
+    retenciones_file_line_ids = fields.One2many(string="Lineas de Retencion", comodel_name="l10n_ar.agente.arba.retencion", inverse_name="report_id")
+    percepciones_file_line_ids = fields.One2many(string="Lineas de Percepcion", comodel_name="l10n_ar.agente.arba.percepcion", inverse_name="report_id")
 
     def _format_cuit(self, partner):
         cuit = partner.main_id_number
