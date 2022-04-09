@@ -21,19 +21,6 @@ class IngresosBrutosArbaRetencion(models.Model):
     _name = "l10n_ar.agente.arba.retencion"
     _description = "Linea de Retencion ARBA"
 
-    company_id = fields.Many2one(comodel_name='res.company', 
-        string='Empresa',
-        store=True, 
-        readonly=True,
-        compute='_compute_company_id')
-    currency_id = fields.Many2one(
-        'res.currency', string='Moneda',
-        related='company_id.currency_id', readonly=True)
-
-    def _compute_company_id(self):
-        for line in self:
-            line.company_id = self.env.company
-
     # Campo 1 - CUIT
     cuit = fields.Char(string="CUIT")
     # Campo 2 - Fecha
@@ -43,7 +30,7 @@ class IngresosBrutosArbaRetencion(models.Model):
     # Campo 4 - Numero Emision
     numero_emision = fields.Char(string="Numero Emision")
     # Campo 5 - Monto Percepcion
-    monto_percepcion = fields.Monetary(string="Monto Percepcion")
+    monto_percepcion = fields.Float(string="Monto Percepcion")
     # Campo 6 - Tipo Operacion
     tipo_operacion = fields.Selection(selection=[
         ('A', 'Alta'),
@@ -56,19 +43,6 @@ class IngresosBrutosArbaRetencion(models.Model):
 class IngresosBrutosArbaPercepcion(models.Model):
     _name = "l10n_ar.agente.arba.percepcion"
     _description = "Linea de Percepcion ARBA"
-
-    company_id = fields.Many2one(comodel_name='res.company', 
-        string='Empresa',
-        store=True, 
-        readonly=True,
-        compute='_compute_company_id')
-    currency_id = fields.Many2one(
-        'res.currency', string='Moneda',
-        related='company_id.currency_id', readonly=True)
-
-    def _compute_company_id(self):
-        for line in self:
-            line.company_id = self.env.company
 
     # Campo 1 - CUIT
     cuit = fields.Char(string="CUIT")
@@ -97,9 +71,9 @@ class IngresosBrutosArbaPercepcion(models.Model):
     # Campo 6 - Numero de Comprobante
     numero_cbte = fields.Char(string="Numero Cbte")
     # Campo 7 - Monto Imponible
-    monto_imponible = fields.Monetary(string="Monto Imponible")
+    monto_imponible = fields.Float(string="Monto Imponible")
     # Campo 8 - Monto Percepcion
-    monto_percepcion = fields.Monetary(string="Monto Percepcion")
+    monto_percepcion = fields.Float(string="Monto Percepcion")
     # Campo 9 - Tipo Operacion
     tipo_operacion = fields.Selection(selection=[
         ('A', 'Alta'),
@@ -140,6 +114,9 @@ class IngresosBrutosArbaWizard(models.Model):
     retenciones_file_line_ids = fields.One2many(string="Lineas de Retencion", comodel_name="l10n_ar.agente.arba.retencion", inverse_name="report_id")
     percepciones_file_line_ids = fields.One2many(string="Lineas de Percepcion", comodel_name="l10n_ar.agente.arba.percepcion", inverse_name="report_id")
 
+    retencion_arba_aplicada_id = fields.Many2one(comodel_name="account.account")
+    percepcion_arba_aplicada_id = fields.Many2one(comodel_name="account.account")
+
     def _format_cuit(self, partner):
         cuit = partner.main_id_number
         return '{}-{}-{}'.format(cuit[0:2], cuit[2:10], cuit[10])
@@ -177,15 +154,15 @@ class IngresosBrutosArbaWizard(models.Model):
     def _format_pto_venta(self, move):
         s = move.document_number.split("-")
         if len(s) != 2:
-            # raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
-            return '0000'
+            raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
+
         return s[0][-4:].zfill(4)
 
     def _format_numero_cbte(self, move):
         s = move.document_number.split("-")
         if len(s) != 2:
-            # raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
-            return '00000000'
+            raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
+
         return s[1][-8:].zfill(8)
 
     def generate(self):
@@ -206,26 +183,16 @@ class IngresosBrutosArbaWizard(models.Model):
             'retenciones_file_line_ids': [(5, 0, 0)]
         })
         
-        # TODO: permitir configurar estas cuentas
-        # tax_account = self.env['account.account'].search([
-        #     ('code', '=', '231000')
-        # ])
-
-        # TODO: cambiar por referencia a percepcion ARBA aplicada,
-        # usar grupo de impuestos o dejar que lo configure el usuario
-        iibb_account = self.env['account.account'].search([
-            # ('code', '=', '231000'),
+        # TODO: mover esto a default
+        self.percepcion_arba_aplicada_id = self.env['account.account'].search([
             ('code', '=', '2.1.03.01.024')
         ])
 
-        # if not tax_account:
-        #     raise ValidationError('Cuenta de IVA no encontrada')
-
-        if not iibb_account:
+        if not self.percepcion_arba_aplicada_id:
             raise ValidationError('Cuenta de percepcion ARBA aplicada no encontrada')
 
         self.perc_line_ids = self.env['account.move.line'].search([
-            ('account_id', '=', iibb_account.id),
+            ('account_id', '=', self.percepcion_arba_aplicada_id.id),
             ('date', '>=', self.date_from),
             ('date', '<=', self.date_to),
             ('move_id.state', '=', 'posted'),
@@ -282,7 +249,7 @@ class IngresosBrutosArbaWizard(models.Model):
                     'monto_imponible': line.invoice_id.amount_untaxed_signed,
                     'monto_percepcion': -line.balance,
                     'tipo_operacion': 'A',
-                    'report_id': self.id
+                    # 'report_id': self.id
                 })
             except:
                 _logger.error("Error procesando percepcion. Asiento {}".format(line.move_id.name))
@@ -304,18 +271,22 @@ class IngresosBrutosArbaWizard(models.Model):
     def generate_retenciones(self):
         records_ret = []
         records_ret_csv = []
+
+        self.write({ 
+            'percepciones_file_line_ids': [(5, 0, 0)],
+            'retenciones_file_line_ids': [(5, 0, 0)]
+        })
         
         # TODO: permitir configurar estas cuentas
         # TODO: cambiar por referencia a retencion ARBA aplicada
-        iibb_account = self.env['account.account'].search([
-            # ('code', '=', '231000'),
+        self.retencion_arba_aplicada_id = self.env['account.account'].search([
             ('code', '=', '2.1.03.01.023'),
         ])
-        if not iibb_account:
+        if not self.retencion_arba_aplicada_id:
             raise ValidationError('Cuenta de retencion ARBA aplicada no encontrada')
 
         self.ret_line_ids = self.env['account.move.line'].search([
-            ('account_id', '=', iibb_account.id),
+            ('account_id', '=', self.retencion_arba_aplicada_id.id),
             ('date', '>=', self.date_from),
             ('date', '<=', self.date_to),
             ('move_id.state', '=', 'posted'),
@@ -387,6 +358,5 @@ class IngresosBrutosArbaWizard(models.Model):
 # 2.1.03.01.023 - Retención IIBB ARBA aplicada
 # 2.1.03.01.024 - Percepción IIBB ARBA aplicada
 
-# TODO: separar en tipo (percepcion/retencion)
 # Las presentaciones son mensual para percepciones y quincenal para retenciones
 # TODO: Agregar header en el archivo CSV

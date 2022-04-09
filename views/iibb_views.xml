@@ -109,10 +109,11 @@
             <form>
                 <field name="type" invisible="1"/>
                 <header>
-                    <!-- TODO -->
-                    <!-- <button name="action_present" string="Presentar" states="draft" type="object" class="oe_highlight"/>
+                    <!-- TODO: mostrar warning de cantidad de solicitudes -->
+                    <!-- TODO: descargar excel -->
+
+                    <button name="action_present" string="Presentar" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_cancel" string="Cancelar" states="draft,presented" type="object"/>
-                    <button name="action_to_draft" string="Cambiar a Borrador" states="cancel" type="object"/> -->
                     <field name="state" widget="statusbar" statusbar_visible="draft,presented"/>
                 </header>
                 <sheet>
@@ -123,6 +124,8 @@
                             <field name="tipo" />
                             <field name="date_from"/>
                             <field name="date_to"/>
+                            <field name="percepcion_arba_aplicada_id"/>
+                            <field name="retencion_arba_aplicada_id"/>
                         </group>
                     </group>
                     <notebook>

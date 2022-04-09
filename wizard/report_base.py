@@ -48,3 +48,9 @@ class ReportBase(models.Model):
         first = today.replace(day=1)
         last_month_end = first - datetime.timedelta(days=1)
         return last_month_end
+
+    def action_present(self):
+        self.state = 'presented'
+
+    def action_cancel(self):
+        self.state = 'cancel'
