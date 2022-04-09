@@ -40,6 +40,7 @@
                                 </group>
                             </group>
                         </page>
+                        <!-- TODO: groups="base.group_no_one" -->
                         <page string="Comprobantes TXT" name="invoices_txt">
                             <field name="comprobante_file_line_ids">
                                 <tree default_order="fecha">
@@ -64,6 +65,7 @@
                                     <field name="monto_alicuota" />
                                     <field name="monto_impuesto_1" />
                                     <field name="monto_impuesto_2" optional="hide" />
+                                    <field name="report_id" invisible="1" />
                                 </tree>
                             </field>
                         </page>
@@ -83,6 +85,7 @@
                                     <field name="fecha_cbte" />
                                     <field name="monto_perc" />
                                     <field name="monto_alicuota" />
+                                    <field name="report_id" invisible="1" />
                                 </tree>
                             </field>
                         </page>
