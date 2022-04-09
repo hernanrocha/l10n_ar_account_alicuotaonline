@@ -23,6 +23,19 @@ class IngresosBrutosAgipComprobante(models.Model):
     _name = "l10n_ar.agente.agip.comprobante"
     _description = "Linea de Comprobante AGIP"
 
+    company_id = fields.Many2one(comodel_name='res.company', 
+        string='Empresa',
+        store=True, 
+        readonly=True,
+        compute='_compute_company_id')
+    currency_id = fields.Many2one(
+        'res.currency', string='Moneda',
+        related='company_id.currency_id', readonly=True)
+
+    def _compute_company_id(self):
+        for line in self:
+            line.company_id = self.env.company
+    
     # Campo 1 - Percepcion/Retencion
     tipo_operacion = fields.Selection(selection=[
         ('1','Retención'), ('2','Percepción')
@@ -90,6 +103,19 @@ class IngresosBrutosAgipComprobante(models.Model):
 class IngresosBrutosAgipNotaCredito(models.Model):
     _name = "l10n_ar.agente.agip.nota_credito"
     _description = "Linea de Nota de Credito AGIP"
+
+    company_id = fields.Many2one(comodel_name='res.company', 
+        string='Empresa',
+        store=True, 
+        readonly=True,
+        compute='_compute_company_id')
+    currency_id = fields.Many2one(
+        'res.currency', string='Moneda',
+        related='company_id.currency_id', readonly=True)
+
+    def _compute_company_id(self):
+        for line in self:
+            line.company_id = self.env.company
 
     # Campo 1 - Tipo de Operacion
     tipo_operacion = fields.Selection(selection=[

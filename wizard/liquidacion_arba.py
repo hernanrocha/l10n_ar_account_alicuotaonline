@@ -21,6 +21,19 @@ class IngresosBrutosArbaRetencion(models.Model):
     _name = "l10n_ar.agente.arba.retencion"
     _description = "Linea de Retencion ARBA"
 
+    company_id = fields.Many2one(comodel_name='res.company', 
+        string='Empresa',
+        store=True, 
+        readonly=True,
+        compute='_compute_company_id')
+    currency_id = fields.Many2one(
+        'res.currency', string='Moneda',
+        related='company_id.currency_id', readonly=True)
+
+    def _compute_company_id(self):
+        for line in self:
+            line.company_id = self.env.company
+
     # Campo 1 - CUIT
     cuit = fields.Char(string="CUIT")
     # Campo 2 - Fecha
@@ -41,6 +54,19 @@ class IngresosBrutosArbaRetencion(models.Model):
 class IngresosBrutosArbaPercepcion(models.Model):
     _name = "l10n_ar.agente.arba.percepcion"
     _description = "Linea de Percepcion ARBA"
+
+    company_id = fields.Many2one(comodel_name='res.company', 
+        string='Empresa',
+        store=True, 
+        readonly=True,
+        compute='_compute_company_id')
+    currency_id = fields.Many2one(
+        'res.currency', string='Moneda',
+        related='company_id.currency_id', readonly=True)
+
+    def _compute_company_id(self):
+        for line in self:
+            line.company_id = self.env.company
 
     # Campo 1 - CUIT
     cuit = fields.Char(string="CUIT")
