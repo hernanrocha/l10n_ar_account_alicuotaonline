@@ -285,15 +285,3 @@
     </record>
 
 </odoo>
-
-
-
-LOGIN
-https://nanosoftware.auth.us-east-2.amazoncognito.com/login?response_type=code&client_id=611pkba77jms42gkoijucdmsju&redirect_uri=https://cliente2.localhost
-
-VALIDATE
-https://cliente2.localhost/?code=296ebfce-ad15-4b74-9533-516a59e3bd9c
-
-
-LOGIN
-https://nanosoftware.auth.us-east-2.amazoncognito.com/login?response_type=token&client_id=611pkba77jms42gkoijucdmsju&redirect_uri=https://cliente2.localhost
