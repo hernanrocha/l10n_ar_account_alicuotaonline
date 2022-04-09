@@ -9,9 +9,8 @@
             <form>
                 <field name="type" invisible="1"/>
                 <header>
-                    <!-- <button name="action_present" string="Presentar" states="draft" type="object" class="oe_highlight"/>
+                    <button name="action_present" string="Presentar" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_cancel" string="Cancelar" states="draft,presented" type="object"/>
-                    <button name="action_to_draft" string="Cambiar a Borrador" states="cancel" type="object"/> -->
                     <field name="state" widget="statusbar" statusbar_visible="draft,presented"/>
                 </header>
                 <sheet>

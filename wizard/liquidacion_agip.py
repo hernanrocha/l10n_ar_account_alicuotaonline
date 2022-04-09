@@ -100,6 +100,8 @@ class IngresosBrutosAgipComprobante(models.Model):
     # Campo 21 - Impuesto aplicado
     monto_impuesto_2 = fields.Monetary(string="Impuesto Aplicado")
 
+    report_id = fields.Many2one(comodel_name="l10n_ar.agente.agip.wizard", ondelete="cascade", readonly=True, invisible=True)
+
 class IngresosBrutosAgipNotaCredito(models.Model):
     _name = "l10n_ar.agente.agip.nota_credito"
     _description = "Linea de Nota de Credito AGIP"
@@ -150,6 +152,8 @@ class IngresosBrutosAgipNotaCredito(models.Model):
     # Campo 13 - Alicuota
     monto_alicuota = fields.Monetary(string="Alicuota")
 
+    report_id = fields.Many2one(comodel_name="l10n_ar.agente.agip.wizard", ondelete="cascade", readonly=True, invisible=True)
+
 class IngresosBrutosAgipWizard(models.Model):
     _name = "l10n_ar.agente.agip.wizard"
     _inherit = [ 'report.pyme_accounting.base' ]
@@ -172,24 +176,25 @@ class IngresosBrutosAgipWizard(models.Model):
     perc_line_ids = fields.Many2many('account.move.line', string="Percepciones", compute="generate")
     ret_line_ids = fields.Many2many('account.move.line', string="Retenciones", compute="generate")
 
+    comprobante_file_line_ids = fields.One2many(string="Lineas de Comprobante", comodel_name="l10n_ar.agente.agip.comprobante", inverse_name="report_id")
+    nota_credito_file_line_ids = fields.One2many(string="Lineas de Notas de Credito", comodel_name="l10n_ar.agente.agip.nota_credito", inverse_name="report_id")
+
+    retencion_agip_aplicada_id = fields.Many2one(comodel_name="account.account")
+    percepcion_agip_aplicada_id = fields.Many2one(comodel_name="account.account")
+
     def _format_tipo_cbte(self, internal_type):
         # TODO: confirmar esto
 
         # invoice, debit_note, credit_note, ticket, 
         # receipt_invoice, customer_payment, supplier_payment, in_document
         if internal_type == 'invoice':
-            return '01'
-        elif internal_type == 'debit_note':
-            return '02'
-        
-        # TODO: descomentar esto
-        # elif internal_type == 'supplier_payment':
-        #     return '03'
+            return '01' # Factura
+        if internal_type == 'debit_note':
+            return '02' # Nota de Debito
+        if internal_type == 'supplier_payment':
+            return '03' # Orden de Pago
 
-        # raise ValidationError('Tipo de documento interno invalido: {}'.format(internal_type))
-            
-        # Orden de pago
-        return '03'
+        raise ValidationError('Tipo de documento interno invalido: {}'.format(internal_type))
 
     # depends('l10n_latam_identification_type_id')
     # partner_id.main_id_category_id.code
@@ -210,23 +215,12 @@ class IngresosBrutosAgipWizard(models.Model):
     def _format_numero_cbte(self, move):
         s = move.document_number.split("-")
         if len(s) != 2:
-            # raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
-            return '0000000000000000'
+            raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
 
         return '{}{}'.format(s[0][-4:].zfill(4), s[1][-12:].zfill(12))
 
     # depends('gross_income_type')
     def _format_situacion_iibb(self, partner_id):
-        # if not partner_id.gross_income_type:
-        #     raise ValidationError(_(
-        #         'Debe establecer el tipo de inscripción de IIBB del partner '
-        #         '"%s" (id: %s)') % (partner_id.name, partner_id.id))
-
-        # # ahora se reportaria para cualquier inscripto el numero de cuit
-        # # gross_income_mapping = { 'multilateral': '2', 'exempt': '4', 'local': '5' }
-        # gross_income_mapping = { 'multilateral': '2', 'no_liquida': '4', 'local': '5' }
-        # return gross_income_mapping[partner_id.gross_income_type]
-        
         # Para evitar saber la situacion de cada cliente,
         # se puede simplemente declarar local y poner el numero de CUIT
         return '5'
@@ -234,10 +228,7 @@ class IngresosBrutosAgipWizard(models.Model):
     # depends('gross_income_type', 'gross_income_number')
     # partner_id.main_id_number
     def _format_numero_iibb(self, partner_id):
-        # if partner_id.gross_income_type == 'no_liquida':
-        #     return '00000000000' 
-    
-        # return partner_id.gross_income_number
+        # CUIT
         return partner_id.main_id_number
 
     # depends('afip_responsability_type_id.code')
@@ -277,8 +268,7 @@ class IngresosBrutosAgipWizard(models.Model):
     def _format_nc_numero_cbte(self, move):
         s = move.document_number.split("-")
         if len(s) != 2:
-            # raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
-            return '000000000000'
+            raise ValidationError('Numero de comprobante invalido: {}'.format(move.document_number))
 
         return '{}{}'.format(s[0][-4:].zfill(4), s[1][-8:].zfill(8))
 
@@ -359,12 +349,11 @@ class IngresosBrutosAgipWizard(models.Model):
         records_nc_csv = []
 
         # TODO: cambiar por referencia a percepcion AGIP aplicada
-        iibb_account = self.env['account.account'].search([
-            # ('code', '=', '231000'),
+        self.percepcion_agip_aplicada_id = self.env['account.account'].search([
             ('code', '=', '2.1.03.01.012')
         ])
 
-        if not iibb_account:
+        if not self.percepcion_agip_aplicada_id:
             raise ValidationError('Cuenta de percepcion AGIP aplicada no encontrada')
         
         # IVA Debito Fiscal
@@ -378,7 +367,7 @@ class IngresosBrutosAgipWizard(models.Model):
             raise ValidationError('Cuenta de IVA Debito no encontrada')
 
         self.perc_line_ids = self.env['account.move.line'].search([
-            ('account_id', '=', iibb_account.id),
+            ('account_id', '=', self.percepcion_agip_aplicada_id.id),
             ('date', '>=', self.date_from),
             ('date', '<=', self.date_to),
             ('move_id.state', '=', 'posted'),
@@ -509,6 +498,31 @@ class IngresosBrutosAgipWizard(models.Model):
                         format_amount(monto_perc, 16, 2, ','),
                     ]
 
+                    self.comprobante_file_line_ids.create({
+                        'tipo_operacion': '2', 
+                        'codigo_norma': '029',
+                        'fecha': fields.Date.from_string(move.date),
+                        'tipo_cbte': self._format_tipo_cbte(internal_type),
+                        'letra_cbte': self._format_letra_cbte(move),
+                        'numero_cbte': self._format_numero_cbte(move),
+                        'fecha_cbte': fields.Date.from_string(move.date),
+                        'monto_total': monto_total,
+                        'numero_certificado': ''.rjust(16, ' '),
+                        'tipo_doc': self._format_tipo_documento(partner_id),
+                        'numero_doc': partner_id.main_id_number,
+                        'situacion_iibb': self._format_situacion_iibb(partner_id),
+                        'numero_iibb': self._format_numero_iibb(partner_id),
+                        'situacion_iva': self._format_situacion_iva(partner_id),
+                        'razon_social': '{:30.30}'.format(partner_id.name),
+                        'monto_otros': monto_otros,
+                        'monto_iva': monto_iva,
+                        'monto_base': monto_base,
+                        'monto_alicuota': monto_alicuota,
+                        'monto_impuesto_1': monto_perc,
+                        'monto_impuesto_2': monto_perc,
+                        'report_id': self.id
+                    })
+
                     records.append(''.join(record))
                     records_csv.append(','.join(map(lambda r: '"{}"'.format(r), record)))
             except:
@@ -522,16 +536,15 @@ class IngresosBrutosAgipWizard(models.Model):
 
         # TODO: cambiar por referencia a retencion AGIP aplicada
         # usar grupo de impuestos o dejar que lo configure el usuario
-        iibb_account = self.env['account.account'].search([
-            # ('code', '=', '231000'),
+        self.retencion_agip_aplicada_id = self.env['account.account'].search([
             ('code', '=', '2.1.03.01.011')
         ])
 
-        if not iibb_account:
+        if not self.retencion_agip_aplicada_id:
             raise ValidationError('Cuenta de retencion AGIP aplicada no encontrada')
 
         self.ret_line_ids = self.env['account.move.line'].search([
-            ('account_id', '=', iibb_account.id),
+            ('account_id', '=', self.retencion_agip_aplicada_id.id),
             ('date', '>=', self.date_from),
             ('date', '<=', self.date_to),
             ('move_id.state', '=', 'posted'),
@@ -590,7 +603,6 @@ class IngresosBrutosAgipWizard(models.Model):
                     # Campo 14 - Situacion frente al IVA
                     self._format_situacion_iva(partner_id),
                     # Campo 15 - Razon Social
-                    # TODO: tal vez reemplazar guiones bajo
                     '{:30.30}'.format(partner_id.name),
                     # Campo 16 - Importe Otros Conceptos
                     format_amount(0, 16, 2, ','),
@@ -605,6 +617,31 @@ class IngresosBrutosAgipWizard(models.Model):
                     # Campo 21 - Impuesto aplicado  
                     format_amount(monto_ret, 16, 2, ','),
                 ]
+
+                self.comprobante_file_line_ids.create({
+                    'tipo_operacion': '1', 
+                    'codigo_norma': '029',
+                    'fecha': fields.Date.from_string(move.date),
+                    'tipo_cbte': self._format_tipo_cbte(internal_type),
+                    'letra_cbte': ' ',
+                    'numero_cbte': self._format_numero_cbte(move),
+                    'fecha_cbte': fields.Date.from_string(move.date),
+                    'monto_total': monto_base,
+                    'numero_certificado': line.name.rjust(16, ' '),
+                    'tipo_doc': self._format_tipo_documento(partner_id),
+                    'numero_doc': partner_id.main_id_number,
+                    'situacion_iibb': self._format_situacion_iibb(partner_id),
+                    'numero_iibb': self._format_numero_iibb(partner_id),
+                    'situacion_iva': self._format_situacion_iva(partner_id),
+                    'razon_social': '{:30.30}'.format(partner_id.name),
+                    'monto_otros': 0,
+                    'monto_iva': 0,
+                    'monto_base': monto_base,
+                    'monto_alicuota': monto_alicuota,
+                    'monto_impuesto_1': monto_ret,
+                    'monto_impuesto_2': monto_ret,
+                    'report_id': self.id
+                })
 
                 records.append(''.join(record))
                 records_csv.append(','.join(map(lambda r: '"{}"'.format(r), record)))
