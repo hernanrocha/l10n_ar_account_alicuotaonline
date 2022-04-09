@@ -65,11 +65,10 @@
                                     <field name="monto_alicuota" />
                                     <field name="monto_impuesto_1" />
                                     <field name="monto_impuesto_2" optional="hide" />
-                                    <field name="report_id" invisible="1" />
                                 </tree>
                             </field>
                         </page>
-                        <page string="Notas de Credito TXT" name="credit_notes_txt">
+                        <!-- <page string="Notas de Credito TXT" name="credit_notes_txt">
                             <field name="nota_credito_file_line_ids">
                                 <tree default_order="fecha">
                                     <field name="tipo_operacion" />
@@ -85,10 +84,9 @@
                                     <field name="fecha_cbte" />
                                     <field name="monto_perc" />
                                     <field name="monto_alicuota" />
-                                    <field name="report_id" invisible="1" />
                                 </tree>
                             </field>
-                        </page>
+                        </page> -->
                         <page string="Comprobantes" name="invoices">
                             <field name="invoice_ids">
                                 <tree default_order="date">
