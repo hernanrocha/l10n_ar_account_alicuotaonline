@@ -51,6 +51,8 @@ class IngresosBrutosArbaRetencion(models.Model):
         ('M', 'Modificacion')
     ], string="Tipo Operacion")
 
+    import_id = fields.Many2one(comodel_name="l10n_ar.agente.arba.wizard", ondelete="cascade", readonly=True, invisible=True)
+
 class IngresosBrutosArbaPercepcion(models.Model):
     _name = "l10n_ar.agente.arba.percepcion"
     _description = "Linea de Percepcion ARBA"
@@ -105,6 +107,8 @@ class IngresosBrutosArbaPercepcion(models.Model):
         ('M', 'Modificacion')
     ], string="Tipo Operacion")
 
+    import_id = fields.Many2one(comodel_name="l10n_ar.agente.arba.wizard", ondelete="cascade", readonly=True, invisible=True)
+
 class IngresosBrutosArbaWizard(models.Model):
     _name = "l10n_ar.agente.arba.wizard"
     _inherit = [ 'report.pyme_accounting.base' ]
@@ -132,6 +136,9 @@ class IngresosBrutosArbaWizard(models.Model):
     payment_ids = fields.Many2many('account.move', string="Pagos", compute="generate")
     perc_line_ids = fields.Many2many('account.move.line', string="Percepciones", compute="generate")
     ret_line_ids = fields.Many2many('account.move.line', string="Retenciones", compute="generate")
+
+    retenciones_file_line_ids = fields.One2many(string="Lineas de Retencion", comodel_name="l10n_ar.agente.arba.retencion", inverse_name="import_id")
+    percepciones_file_line_ids = fields.One2many(string="Lineas de Percepcion", comodel_name="l10n_ar.agente.arba.percepcion", inverse_name="import_id")
 
     def _format_cuit(self, partner):
         cuit = partner.main_id_number
@@ -185,12 +192,19 @@ class IngresosBrutosArbaWizard(models.Model):
         if not self.date_from or not self.date_to:
             return
 
-        self.generate_percepciones()
-        self.generate_retenciones()
+        if self.tipo == 'retenciones':
+            self.generate_retenciones()
+        else:
+            self.generate_percepciones()
 
     def generate_percepciones(self):
         records_perc = []
         records_perc_csv = []
+
+        self.write({ 
+            'percepciones_file_line_ids': [(5, 0, 0)],
+            'retenciones_file_line_ids': [(5, 0, 0)]
+        })
         
         # TODO: permitir configurar estas cuentas
         # tax_account = self.env['account.account'].search([
@@ -257,6 +271,19 @@ class IngresosBrutosArbaWizard(models.Model):
 
                 records_perc.append(''.join(record))
                 records_perc_csv.append(','.join(map(lambda r: '"{}"'.format(r), record)))
+
+                self.percepciones_file_line_ids.create({
+                    'cuit': self._format_cuit(partner_id),
+                    'fecha': fields.Date.from_string(line.date),
+                    'tipo_cbte': self._format_tipo_cbte(move),
+                    'letra_cbte': self._format_letra_cbte(move), 
+                    'pto_venta': self._format_pto_venta(move),
+                    'numero_cbte': self._format_numero_cbte(move),
+                    'monto_imponible': line.invoice_id.amount_untaxed_signed,
+                    'monto_percepcion': -line.balance,
+                    'tipo_operacion': 'A',
+                    'report_id': self.id
+                })
             except:
                 _logger.error("Error procesando percepcion. Asiento {}".format(line.move_id.name))
 
@@ -320,6 +347,17 @@ class IngresosBrutosArbaWizard(models.Model):
 
                 records_ret.append(''.join(record))
                 records_ret_csv.append(','.join(map(lambda r: '"{}"'.format(r), record)))
+
+                # TODO: Mostrar cantidades y totales
+                self.percepciones_file_line_ids.create({
+                    'cuit': self._format_cuit(partner_id),
+                    'fecha': fields.Date.from_string(line.date),
+                    'numero_sucursal': self._format_pto_venta(move),
+                    'numero_emision': self._format_numero_cbte(move),
+                    'monto_percepcion': -line.balance,
+                    'tipo_operacion': 'A',
+                    'report_id': self.id
+                })
             except:
                 _logger.error("Error procesando retencion. Asiento {}".format(line.move_id.name))
 

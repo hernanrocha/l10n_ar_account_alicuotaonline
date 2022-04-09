@@ -109,6 +109,7 @@
             <form>
                 <field name="type" invisible="1"/>
                 <header>
+                    <!-- TODO -->
                     <!-- <button name="action_present" string="Presentar" states="draft" type="object" class="oe_highlight"/>
                     <button name="action_cancel" string="Cancelar" states="draft,presented" type="object"/>
                     <button name="action_to_draft" string="Cambiar a Borrador" states="cancel" type="object"/> -->
@@ -144,6 +145,35 @@
                                         attrs="{'invisible': [('tipo', '=', 'percepciones')]}"/>
                                 </group>
                             </group>
+                        </page>
+                        <page string="Percepciones TXT" name="percepciones_txt" 
+                            attrs="{'invisible': [('tipo', '=', 'percepciones')]}">
+                            <field name="percepciones_file_line_ids">
+                                <tree default_order="fecha">
+                                    <field name="cuit"/>
+                                    <field name="fecha"/>
+                                    <field name="numero_sucursal"/>
+                                    <field name="numero_emision" />
+                                    <field name="monto_percepcion" />
+                                    <field name="tipo_operacion" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Retenciones TXT" name="retenciones_txt" 
+                            attrs="{'invisible': [('tipo', '=', 'retenciones')]}">
+                            <field name="retenciones_file_line_ids">
+                                <tree default_order="fecha">
+                                    <field name="cuit"/>
+                                    <field name="fecha"/>
+                                    <field name="tipo_cbte" />
+                                    <field name="letra_cbte" />
+                                    <field name="pto_venta" />
+                                    <field name="numero_cbte" />
+                                    <field name="monto_imponible" />
+                                    <field name="monto_percepcion" />
+                                    <field name="tipo_operacion" />
+                                </tree>
+                            </field>
                         </page>
                         <page string="Comprobantes" name="invoices" 
                             attrs="{'invisible': [('tipo', '=', 'retenciones')]}">
